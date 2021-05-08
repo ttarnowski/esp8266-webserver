@@ -19,7 +19,22 @@ void setup() {
   Serial.begin(115200);
   delay(5000);
 
-  server.serveStatic("/static", LittleFS, "/");
+  server.on("/stream-index", HTTPMethod::HTTP_GET, []() {
+    LittleFS.begin();
+
+    File file = LittleFS.open("index.html", "r");
+
+    if (!file) {
+      Serial.println("could not open file for read");
+      server.send(500, "application/json",
+                  "{\"error\":\"could not open file\"}");
+    } else {
+      server.streamFile<File>(file, "text/html");
+      file.close();
+    }
+
+    LittleFS.end();
+  });
 
   server.on("/", HTTPMethod::HTTP_GET,
             []() { server.send(200, "text/plain", "OK"); });
@@ -38,8 +53,6 @@ void setup() {
     }
 
     server.begin();
-
-    LittleFS.begin();
 
     timer.setOnLoop([]() {
       server.handleClient();
