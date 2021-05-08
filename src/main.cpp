@@ -19,25 +19,28 @@ void setup() {
   Serial.begin(115200);
   delay(5000);
 
-  server.on("/stream-index", HTTPMethod::HTTP_GET, []() {
-    LittleFS.begin();
+  server.on("/", HTTPMethod::HTTP_POST, []() {
+    Serial.printf("count body param: %s\n", server.arg("count").c_str());
 
-    File file = LittleFS.open("index.html", "r");
+    char cookie[64];
+    server.header("Cookie").toCharArray(cookie, sizeof(cookie) - 1);
 
-    if (!file) {
-      Serial.println("could not open file for read");
-      server.send(500, "application/json",
-                  "{\"error\":\"could not open file\"}");
-    } else {
-      server.streamFile<File>(file, "text/html");
-      file.close();
-    }
+    Serial.printf("X-Test: %s\n", server.header("X-Test").c_str());
+    Serial.printf("Content-Type: %s\n", server.header("Content-Type").c_str());
 
-    LittleFS.end();
+    char body[128];
+    server.arg("plain").toCharArray(body, sizeof(body) - 1);
+    Serial.printf("Body: %s\n", body);
+
+    char respBody[100];
+    sprintf(respBody, "Cookie Header: %s", cookie);
+
+    server.sendHeader("X-User", "123");
+    server.send(200, "text/plain", respBody);
   });
 
-  server.on("/", HTTPMethod::HTTP_GET,
-            []() { server.send(200, "text/plain", "OK"); });
+  server.onNotFound(
+      []() { server.send(404, "text/plain", "This is not found"); });
 
   wifiManager.connect([](wl_status_t status) {
     if (status != WL_CONNECTED) {
@@ -52,6 +55,9 @@ void setup() {
       Serial.println("MDNS responder started");
     }
 
+    const char *headerKeys[] = {"Cookie", "X-Test", "Content-Type"};
+    size_t headerKeysSize = sizeof(headerKeys) / sizeof(char *);
+    server.collectHeaders(headerKeys, headerKeysSize);
     server.begin();
 
     timer.setOnLoop([]() {
