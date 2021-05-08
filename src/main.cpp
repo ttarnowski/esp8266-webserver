@@ -19,6 +19,8 @@ void setup() {
   Serial.begin(115200);
   delay(5000);
 
+  server.serveStatic("/static", LittleFS, "/");
+
   server.on("/", HTTPMethod::HTTP_GET,
             []() { server.send(200, "text/plain", "OK"); });
 
@@ -36,6 +38,8 @@ void setup() {
     }
 
     server.begin();
+
+    LittleFS.begin();
 
     timer.setOnLoop([]() {
       server.handleClient();
