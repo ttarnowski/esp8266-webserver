@@ -1,7 +1,7 @@
 # 100DaysOfCode in IoT Challenge
-## Day 22
+## Day 23
 
-ESP8266 Web Server Part 1 - Basics
+ESP8266 Web Server Part 2 - Headers and Body
 
 ## Requirements
 1. Visual Studio Code IDE:
@@ -42,9 +42,9 @@ Type `PlatformIO: Upload`
 
 Press Enter
 
-## Link to YouTube Video (Day22):
+## Link to YouTube Video (Day23):
 
-https://www.youtube.com/watch?v=DTvE89Z0IQM
+https://www.youtube.com/watch?v=pnzm8DDHIu4
 
 ## File System Examples
 
